@@ -11,25 +11,45 @@ namespace CodexSoft\ErrorsToExceptions;
 class ErrorsToExceptions
 {
 
-    public static function enable()
+    private static $isEnabled = false;
+
+    /**
+     * @param int|null $errorSeveritiesToConvert
+     */
+    public static function enable(?int $errorSeveritiesToConvert = E_ALL): void
     {
+        if (self::$isEnabled === true) {
+            return;
+        }
+
         /**
          * throw exceptions based on E_* error types
+         * returns true if error handled false otherwise
          */
-        \set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) {
-            // error was suppressed with the @-operator
-            if (0 === error_reporting()) {
+        \set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) use ($errorSeveritiesToConvert) {
+
+            //if ($errorSeveritiesToConvert === -1) {
+            //    return false;
+            //}
+
+            // parhaps error was suppressed with the @-operator
+            if (\error_reporting() === 0) {
                 return false;
             }
 
-            if (!(error_reporting() & $err_severity)) {
+            if (!$errorSeveritiesToConvert) {
+                return false;
+                //$errorSeveritiesToConvert = error_reporting();
+            }
+
+            //if (!(error_reporting() & $err_severity)) {
+            if (!$errorSeveritiesToConvert & $err_severity) {
                 // Этот код ошибки не включен в error_reporting,
                 // так что пусть обрабатываются стандартным обработчиком ошибок PHP
                 return false;
             }
 
-            switch($err_severity)
-            {
+            switch($err_severity) {
                 case E_ERROR:               throw new \ErrorException           ($err_msg, 0, $err_severity, $err_file, $err_line);
                 case E_WARNING:             throw new WarningException          ($err_msg, 0, $err_severity, $err_file, $err_line);
                 case E_PARSE:               throw new ParseException            ($err_msg, 0, $err_severity, $err_file, $err_line);
@@ -49,6 +69,8 @@ class ErrorsToExceptions
                     return true;
             }
         });
+
+        self::$isEnabled = true;
     }
 
     /**
@@ -56,7 +78,11 @@ class ErrorsToExceptions
      */
     public static function disable(): void
     {
+        if (self::$isEnabled === false) {
+            return;
+        }
         \restore_error_handler();
+        self::$isEnabled = false;
     }
 
 }
