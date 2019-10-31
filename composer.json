@@ -1,0 +1,21 @@
+{
+    "name": "codexsoft/errors-to-exceptions",
+    "license": "MIT",
+    "description": "Some boilerplate code to catch errors as exceptions",
+    "require": {
+        "php": "^7.2.0"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "": ["src/", "vendor/"]
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "": ["tests/unit/"]
+        }
+    }
+}
