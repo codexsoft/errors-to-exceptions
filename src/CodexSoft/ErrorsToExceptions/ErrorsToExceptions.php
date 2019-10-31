@@ -4,6 +4,9 @@ namespace CodexSoft\ErrorsToExceptions;
 
 /**
  * inspired by https://www.php.net/manual/ru/function.set-error-handler.php#112881
+ *
+ * The error handlers are stacked with set_error_handler(), and popped with restore_error_handler()
+ * https://www.php.net/manual/ru/function.restore-error-handler.php#82139
  */
 class ErrorsToExceptions
 {
@@ -13,10 +16,18 @@ class ErrorsToExceptions
         /**
          * throw exceptions based on E_* error types
          */
-        set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context)
-        {
+        \set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) {
             // error was suppressed with the @-operator
-            if (0 === error_reporting()) { return false;}
+            if (0 === error_reporting()) {
+                return false;
+            }
+
+            if (!(error_reporting() & $err_severity)) {
+                // Этот код ошибки не включен в error_reporting,
+                // так что пусть обрабатываются стандартным обработчиком ошибок PHP
+                return false;
+            }
+
             switch($err_severity)
             {
                 case E_ERROR:               throw new \ErrorException           ($err_msg, 0, $err_severity, $err_file, $err_line);
@@ -38,6 +49,14 @@ class ErrorsToExceptions
                     return true;
             }
         });
+    }
+
+    /**
+     * Disables errors-to-exceptions convertation
+     */
+    public static function disable(): void
+    {
+        \restore_error_handler();
     }
 
 }
