@@ -26,7 +26,7 @@ class ErrorsToExceptions
          * throw exceptions based on E_* error types
          * returns true if error handled false otherwise
          */
-        \set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) use ($errorSeveritiesToConvert) {
+        \set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context = []) use ($errorSeveritiesToConvert) {
 
             //if ($errorSeveritiesToConvert === -1) {
             //    return false;
